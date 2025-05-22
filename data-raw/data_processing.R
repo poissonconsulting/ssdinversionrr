@@ -22,6 +22,8 @@ read_river_file <- function(f){
 
 }
 
+
+
 list_files <- list.files("data-raw/river_data", full.names = TRUE)
 
 # readr::spec(readr::read_csv(list_files[[1]], skip=3))
@@ -35,12 +37,15 @@ flodata <- list_files |>
   dplyr::summarise(flow=max(max),
                    n=dplyr::n(), .groups = "drop") |>
   dplyr::filter(n %in% c(1, 365, 366)) |>
+  # save as dataset
   dplyr::nest_by(station_id) |>
   dplyr::mutate(nyear=nrow(data),
                 fit=list(ssdtools::ssd_fit_dists(data, left="flow")),
                 hc_multi=list(ssdtools::ssd_hc(fit, proportion=c(1-1/100, 1-1/200, 1-1/500))),
-                hc_arithmetic=list(ssdtools::ssd_hc(fit, proportion=c(1-1/100, 1-1/200, 1-1/500), multi_est = FALSE)))
+                hc_arithmetic=list(ssdtools::ssd_hc(fit, proportion=c(1-1/100, 1-1/200, 1-1/500), multi_est = FALSE)),
+                gof=list(ssdtools::ssd_gof(fit)))
 
 
+usethis::use_data(flodata, overwrite=TRUE)
 
-usethis::use_data(flowdata, overwrite=TRUE)
+
