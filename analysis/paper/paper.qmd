@@ -1,30 +1,25 @@
 ---
-title: "Title Goes Here"
+title: "Model averaging statistical distributions and the inversion principle"
 author:
-  - Jane Doe:
+  - David Fox:
       correspondence: "yes"
-      email: janedoe@fosg.org
-      orcid: 0000-0003-1689-0557
+      email: david.fox@environmetrics.net.au
+      orcid: 0000-0002-3178-7243
       institute:
         - fosg
         - fop
-  - John Q. Doe:
-      institute: fosg
-      orcid: 0000-0003-1689-0558
-  - Peder Ås:
-      institute: fosg
-      orcid: 0000-0003-1689-0559
-  - Juan Pérez:
-      orcid: 0000-0003-1689-0551
-      institute:
-        - name: Acme Corporation
-  - Max Mustermann:
-      orcid: 0000-0003-1689-0552
+  - Rebecca Fisher:
+      institute: 
+        - aims
+        - iormc
+      orcid: 0000-0001-5148-6731
+  - Joe Thorley:
+      orcid: 0000-0002-7683-4592
 institute:
-  - fosg:
-      name: Formatting Open Science Group
-      address: 23 Science Street, Eureka, Mississippi, USA
-  - fop: Federation of Planets
+  - fosg: The University of Melbourne, Australia
+  - fop: Environmetrics Australia, Australia
+  - aims: Australian Institute of Marine Science, Australia
+  - iomrc: Oceans Institute, The University of Western Australia, Australia
 title-block-published: "Last updated"  
 date: now
 date-format: long
@@ -47,9 +42,9 @@ csl: "../templates/journal-of-archaeological-science.csl" # Insert path for the 
 abstract: |
   Text of abstract
 keywords: |
-  keyword 1; keyword 2; keyword 3
+  model averaging; AICc weights 2; statistical distribution 3
 highlights: |
-  These are the highlights. 
+  This paper descibed how typical arithmetic averaging of statistical distributions fails to satisfy the inversion princple and provides an alternative method for obtaining model averaged values from the extremes of statistical distributions. 
 ---
 
 <!-- This is the format for text comments that will be ignored during renderings. Do not put R code in these comments because it will not be ignored. -->
@@ -64,30 +59,192 @@ Highlights: `r rmarkdown::metadata$highlights`
 
 # Introduction
 
-Here is a citation [@Marwick2017]
+Statistical distributions are widely used across all fields of science to provide probabilistic estimates that are critical for scientific inference, and more importantly in a range of decision science frameworks. For example, the species sensitivity distribution (SSD) is used in the Australian [@warne_revised_2018] and Canadian water quality frameworks to determine concentrations that are protection of most species within an ecosystem. In this case regulators are typically interested in the lower tails of the statistical distribution, such as the 1th, 5th and 10th percentile, which would represent concentrations protective of 99, 95 and 90% of the ecosystem. Another example is in maximum streamflow estimations sometimes used in risk management of hydraulic structures, which may be more interested in the extreme upper tails of a statistical distribution, that represent rare events, such a 1 in 100 year, 1 in 200 year, or 1 in 500 year frequency [@bento_improved_2023].
 
-# Background
+In many situations, the appropriate statistical distribution to use is not clear, and there is no theoretically correct distribution. Uncertainty in the appropriate theoretical distribution has lead to an increasing popularity in the use of model averaging [@burnham_model_2002]. Typically, model averaging is carried out by calculating an arithmetic  average of the value of interest, usually weighted according to the relative AICc weights of input distributions [@bento_improved_2023, @thorley_ssdtools_2018].
+
+The weighted arithmetic mean is conventionally used for averaging model parameters or estimates [@burnham_model_2002]. 
+However, in the case of $\text{HC}_x$ and $\text{HP}_u$ values, the estimator $\widetilde{\text{HC}}_x$ fails to satisfy the *inversion principle* [@fox_methodologies_2024] which requires 
+$$\left[ \text{HP}_u \right]_{u = \text{HC}_\theta } = \theta$$
+This inconsistency has been rectified in `ssdtools` v2 [@thorley_ssdtools_2025] by estimating the model-averaged $\text{HC}_x$ (denoted $\widehat{\text{HC}}_x$) directly from the model-averaged cumulative distribution function (*cdf*) 
+$$G\left( u \right) = \sum\limits_{i = 1}^m w_i F_i\left( u \right)$$
+where ${F_i}\left(  \cdot  \right)$ is the *cdf* for the the *i^th^* model and $w_i$ is the model weight as before. $\widehat{\text{HC}}_x$ is then obtained as the solution to
+$${u:G\left( u \right) = x}$$ 
+or, equivalently
+$$u:G\left( u \right) - x = 0$$ 
+for the proportion affected $x$. 
+
+Here we demonstrate the potential error that may be introduced by the failure of arithmetic model averaging to satisfy the inversion principle, and make a call for the scientific community to lean on the technological advances that ensure model averaging of extreme estimates from statistical distributions is done correctly.
 
 # Methods
 
+## Case study 1 - Species sensitivity distribution (SSD) modelling
+
+We used the example datasets in the ssddata package in R (Fisher & Thorley 2021) to examine the range of differences in estimated model averaged HCx values when calculated using a weighted arithmetic mean (default method for ssdtools versions 0 and 1) relative to the values obtained by estimating the model-averaged HC directly from the model-averaged cumulative distribution function (see equation XX above). 
+
+To run the case studies, data were first extracted from ssddata [@ssddata] using the function get_ssddata. These were then fit using ssdtools version 2.0 [@thorley_ssdtools_2025], via the ssd_fit_dists function,  using the lognormal, loglogistic, log Gumbel, Weibull, gamma and lognormal-lognormal mixture distributions. While there are other distributions available in ssdtools, this set represents the recommended set of stable distributions (Fox et al. 2024). 
+
+The estimated model averaged concentrations that protect 99, 95 and 80% of the population (PC99, PC95, PC80) were estimated from the resulting fits using both a weighted average, as well as the model-averaged cumulative distribution function. We then used the estimated hazard concentrations to estimate the percentage of species actually protected for each methods.
+
+## Case study 2 - Maximum streamflow frequency estimation
+
+Data on end of river streamflow rates across a range of catchments on the Great Barrier Reef (GBR) in Queensland were download from the publicly-available QLD discharge data at https://water-monitoring.information.qld.gov.au/. We downloaded the variable “stream discharge (megalitres/day)” for the full dataset. We did not use the provided daily data as these include modeled interpolation data for which there was limited information, and we wanted to ensure the data used represented real, maximum stream flow discharge rates.
+
+We selected a subset of the most relevant  gauges for the GBR, which were the lowest gauges in the catchment. All have some impact on coastal communities or roads (e.g., when they flood we have parts of the Bruce Highway cut for days/weeks which impacts transport of goods incl food into NQ and FNQ).
+
 # Results
 
-<!-- Here's some example analysis code: -->
-
+## Case study 1
 ```{r}
 #| label: get-data
-#| eval: false
+#| eval: true
+#| echo: false
 # Note the path that we need to use to access our data files when rendering this document
-my_data <- read.csv(here::here('analysis/data/raw_data/my_csv_file.csv'))
+library(ggplot2)
+library(ssdtools)
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(ssdinversionrr)
+library(ggpubr)
+library(ssddata)
+
+pc_vec <- c(1:20)/100
+
+unused_dat <- c("ssd_fits", "aims_data", "anon_data", "csiro_data",  "ccme_data", "anzg_data")
+ssd_data <- data(package="ssddata")$results |>
+  data.frame() |>
+  dplyr::select(dataset=Item) |>
+  dplyr::filter(!(dataset %in% unused_dat)) |>
+  dplyr::nest_by(dataset) |>
+  dplyr::mutate(data=list(get_ssddata(dataset)),
+                nsp=nrow(data),
+                fit=list(ssdtools::ssd_fit_dists(data, left="Conc")),
+                hc_multi=list(ssdtools::ssd_hc(fit, proportion=pc_vec)),
+                hc_arithmetic=list(ssdtools::ssd_hc(fit, proportion=pc_vec, multi_est = FALSE)),
+                gof=list(ssdtools::ssd_gof(fit)),
+                autoplot_f = list(autoplot_fun(fit, dataset, plot.tag.position = c(0.2, 0.95))))
+
+gof_dat <- ssd_data |>
+  tidyr::unnest(gof) |>
+  select(dataset, data, nsp,fit, weight, dist)
+
+hc_multi_dat <-  ssd_data |>
+  tidyr::unnest(hc_multi) |>
+  mutate(multi_est = TRUE)
+
+hc_arithmetic_dat <-  ssd_data |>
+  tidyr::unnest(hc_arithmetic) |>
+  mutate(multi_est = FALSE)
+
+hc_dat <- hc_multi_dat |> bind_rows(hc_arithmetic_dat) |>
+  dplyr::select(dataset, est_conc=est, target_p = proportion, fit, multi_est) |>
+  mutate(estimated_p = purrr::pmap(list(x=.data$fit, conc=.data$est_conc, multi_est=.data$multi_est), ssd_hp)) |>
+  unnest(estimated_p) |>
+  select(dataset, est_conc, target_p, est_p = est, multi_est) |>
+  mutate(target_p=target_p*100, 
+         est_p = est_p,
+         ratio=est_p/target_p)
+
 ```
+
+We found that there is substantial error when converting between the HCx and the HPx, when HCx estimates are obtained using a geometric averaging method, but there is no error when HCx estimates are obtained using model-averaged cumulative distribution function (@fig-pc-plot). Substantial error for the averaging method occurs across most of the case studies examined for the PC99 (1% effected), and always resulted in a greater number of species being effected when compared to the intended target percentage (@fig-pc-plot). From some datasets (e.g. ccme_glyphosate) the percentage of species actually effected using the averaging method was up to 3 times the target value (@fig-pc-plot). In general the error in the estimated number of species effected declines as the target percentage increases (@fig-pc-plot). For some datasets the number of species effected is actually less than the target percentage at higher  percentage values (e.g.  aims_molybdenum_marine, 5-10%).
 
 ```{r}
-#| label: fig-demo-plot
-#| fig-cap: "A plot of random numbers"
-plot(rnorm(10))
+#| label: fig-pc-plot
+#| fig-height: 10
+#| fig-width: 7
+#| fig-cap: "The ratio of estimated percentage of species effected against the target percentage of species effected, plotted against the target percentage for the arithmetic (multi_est = FALSE) and the multi (multi_est = TRUE) averaging methods."
+hc_dat |>
+  ggplot(aes(x=target_p, y=ratio, color = multi_est)) +
+  geom_line() +
+  scale_y_log10() +
+  xlab("target % effected") +
+  ylab("ratio (estimated % effected / target % effected)") +
+  facet_wrap(~dataset, ncol = 4)
+
 ```
 
-@fig-demo-plot shows how we can have a caption and cross-reference for a plot. Note that figure label and cross-references must both be prefixed with `fig-`
+## Case study 2
+
+```{r}
+#| label: get-ssddata
+#| eval: true
+#| echo: false
+# Note the path that we need to use to access our data files when rendering this document
+library(ggplot2)
+library(ssdtools)
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(ssdinversionrr)
+library(ggpubr)
+
+data("flodata")
+
+frequency_vec <- c(1, 5, 10, 50, 100, 500, 1000)
+
+fits_dat <- flodata |>
+  dplyr::nest_by(station_id) |>
+  dplyr::mutate(nyear=nrow(data),
+                fit=list(ssdtools::ssd_fit_dists(data, left="flow")),
+                hc_multi=list(ssdtools::ssd_hc(fit, proportion=1-1/frequency_vec)),
+                hc_arithmetic=list(ssdtools::ssd_hc(fit, proportion=1-1/frequency_vec, multi_est = FALSE)),
+                gof=list(ssdtools::ssd_gof(fit)),
+                autoplot_f = list(autoplot_fun(fit, station_id, plot.tag.position = c(0.2, 0.95))))
+
+gof_dat <- fits_dat |>
+  tidyr::unnest(gof) |>
+  select(station_id, data, nyear,fit, weight, dist)
+
+hc_multi_dat <-  fits_dat |>
+  tidyr::unnest(hc_multi) |>
+  mutate(multi_est = TRUE)
+
+hc_arithmetic_dat <-  fits_dat |>
+  tidyr::unnest(hc_arithmetic) |>
+  mutate(multi_est = FALSE)
+
+hc_dat <- hc_multi_dat |> bind_rows(hc_arithmetic_dat) |>
+  dplyr::select(station_id, est_conc=est, target_p = proportion, fit, multi_est) |>
+  mutate(estimated_p = purrr::pmap(list(x=.data$fit, conc=.data$est_conc, multi_est=.data$multi_est), ssd_hp)) |>
+  unnest(estimated_p) |>
+  select(station_id, est_conc, target_p, est_p = est, multi_est) |>
+  mutate(est_p = est_p/100,
+         estimated_frequency = (1-est_p)^-1,
+         target_frequency = round((1-target_p)^-1),
+         ratio=estimated_frequency/target_frequency)
+
+```
+
+
+
+```{r}
+#| label: fig-c1ffd-plot
+#| fig-height: 10
+#| fig-width: 7
+#| fig-cap: "Fitted cumulative distributions for six statistical distributions, across seven example river flow datasets."
+ggarrange(plotlist = fits_dat$autoplot_f, 
+          common.legend = TRUE, ncol = 2, nrow = 4,
+          labels = fits_dat$station_id)
+```
+
+We found there could be very large deviations from the intended original target frequency when the back calculated estimated proportions were converted into the corresponding estimated frequencies (@fig-frequency-plot). In most cases, the estimated frequencies were higher than the target frequency, meaning that events were predicted to be more common than they actually were (@fig-frequency-plot). For one river, the estimated frequency was as high as 5x the original target, particularly when considering extreme rare events (for example, a one in 500 year event).
+
+```{r}
+#| label: fig-frequency-plot
+#| fig-cap: "The ratio of estimated frequency against the target frequency, plotted against the target frequency for the arithmetic (multi_est = FALSE) and the multi (multi_est = TRUE) averaging methods."
+freq_ratio_plot <- hc_dat |>
+  ggplot(aes(x=target_frequency, y=ratio, color = multi_est)) +
+  geom_line() +
+  scale_y_log10() +
+  xlab("target frequency") +
+  ylab("ratio (estimated frequency / target frequency)") +
+  facet_wrap(~station_id)
+freq_ratio_plot
+```
+
+
 
 ```{r}
 #| label: demo-inline-code
