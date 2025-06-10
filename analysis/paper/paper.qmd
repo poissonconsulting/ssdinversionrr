@@ -42,9 +42,9 @@ csl: "../templates/journal-of-archaeological-science.csl" # Insert path for the 
 abstract: |
   Text of abstract
 keywords: |
-  model averaging; AICc weights 2; statistical distribution 3
+  model averaging; AICc weights; statistical distribution
 highlights: |
-  This paper descibed how typical arithmetic averaging of statistical distributions fails to satisfy the inversion princple and provides an alternative method for obtaining model averaged values from the extremes of statistical distributions. 
+  This paper descibes how typical arithmetic averaging of statistical distributions fails to satisfy the inversion princple and provides an alternative method for obtaining model averaged values from the extremes of statistical distributions. 
 ---
 
 <!-- This is the format for text comments that will be ignored during renderings. Do not put R code in these comments because it will not be ignored. -->
@@ -59,9 +59,14 @@ Highlights: `r rmarkdown::metadata$highlights`
 
 # Introduction
 
-Statistical distributions are widely used across all fields of science to provide probabilistic estimates that are critical for scientific inference, and more importantly in a range of decision science frameworks. For example, the species sensitivity distribution (SSD) is used in the Australian [@warne_revised_2018] and Canadian water quality frameworks to determine concentrations that are protection of most species within an ecosystem. In this case regulators are typically interested in the lower tails of the statistical distribution, such as the 1th, 5th and 10th percentile, which would represent concentrations protective of 99, 95 and 90% of the ecosystem. Another example is in maximum streamflow estimations sometimes used in risk management of hydraulic structures, which may be more interested in the extreme upper tails of a statistical distribution, that represent rare events, such a 1 in 100 year, 1 in 200 year, or 1 in 500 year frequency [@bento_improved_2023].
+Statistical distributions are widely used across all fields of science to provide probabilistic estimates that are critical for scientific inference, and more importantly in a range of decision science frameworks. 
+For example, the species sensitivity distribution (SSD) is used in the Australian [@warne_revised_2018] and Canadian water quality frameworks to determine concentrations that are protection of most species within an ecosystem. 
+In this case regulators are typically interested in the lower tails of the statistical distribution, such as the 1th, 5th and 10th percentile, which would represent concentrations protective of 99, 95 and 90% of the ecosystem. 
+Another example is in maximum streamflow estimations sometimes used in risk management of hydraulic structures, which may be more interested in the extreme upper tails of a statistical distribution, that represent rare events, such a 1 in 100 year, 1 in 200 year, or 1 in 500 year frequency [@bento_improved_2023].
 
-In many situations, the appropriate statistical distribution to use is not clear, and there is no theoretically correct distribution. Uncertainty in the appropriate theoretical distribution has lead to an increasing popularity in the use of model averaging [@burnham_model_2002]. Typically, model averaging is carried out by calculating an arithmetic  average of the value of interest, usually weighted according to the relative AICc weights of input distributions [@bento_improved_2023, @thorley_ssdtools_2018].
+In many situations, the appropriate statistical distribution to use is not clear, and there is no theoretically correct distribution. 
+Uncertainty in the appropriate theoretical distribution has lead to an increasing popularity in the use of model averaging [@burnham_model_2002]. 
+Typically, model averaging is carried out by calculating an arithmetic  average of the value of interest, usually weighted according to the relative AICc weights of input distributions [@bento_improved_2023, @thorley_ssdtools_2018].
 
 The weighted arithmetic mean is conventionally used for averaging model parameters or estimates [@burnham_model_2002]. 
 However, in the case of $\text{HC}_x$ and $\text{HP}_u$ values, the estimator $\widetilde{\text{HC}}_x$ fails to satisfy the *inversion principle* [@fox_methodologies_2024] which requires 
@@ -87,20 +92,26 @@ Here we demonstrate the potential error that may be introduced by the failure of
 
 We used the example datasets in the ssddata package in R (Fisher & Thorley 2021) to examine the range of differences in estimated model averaged HCx values when calculated using a weighted arithmetic mean (default method for ssdtools versions 0 and 1) relative to the values obtained by estimating the model-averaged HC directly from the model-averaged cumulative distribution function (see equation @eq-inv-princ above). 
 
-To run the case studies, data were first extracted from ssddata [@ssddata] using the function get_ssddata. These were then fit using ssdtools version 2.0 [@thorley_ssdtools_2025], via the ssd_fit_dists function,  using the lognormal, loglogistic, log Gumbel, Weibull, gamma and lognormal-lognormal mixture distributions. While there are other distributions available in ssdtools, this set represents the recommended set of stable distributions (Fox et al. 2024). 
+To run the case studies, data were first extracted from ssddata [@ssddata] using the function get_ssddata. 
+These were then fit using ssdtools version 2.0 [@thorley_ssdtools_2025], via the ssd_fit_dists function,  using the lognormal, loglogistic, log Gumbel, Weibull, gamma and lognormal-lognormal mixture distributions. 
+While there are other distributions available in ssdtools, this set represents the recommended set of stable distributions (Fox et al. 2024). 
 
-The estimated model averaged concentrations that protect 99, 95 and 80% of the population (PC99, PC95, PC80) were estimated from the resulting fits using both a weighted average, as well as the model-averaged cumulative distribution function. We then used the estimated hazard concentrations to estimate the percentage of species actually protected for each methods.
+The estimated model averaged concentrations that protect 99, 95 and 80% of the population (PC99, PC95, PC80) were estimated from the resulting fits using both a weighted average, as well as the model-averaged cumulative distribution function. 
+We then used the estimated hazard concentrations to estimate the percentage of species actually protected for each method.
 
 ## Case study 2 - Maximum streamflow frequency estimation
 
-Data on end of river streamflow rates across a range of catchments on the Great Barrier Reef (GBR) in Queensland were download from the publicly-available QLD discharge data at https://water-monitoring.information.qld.gov.au/. We downloaded the variable “stream discharge (megalitres/day)” for the full dataset. We did not use the provided daily data as these include modeled interpolation data for which there was limited information, and we wanted to ensure the data used represented real, maximum stream flow discharge rates.
+Data on end of river streamflow rates across a range of catchments on the Great Barrier Reef (GBR) in Queensland were download from the publicly-available QLD discharge data at https://water-monitoring.information.qld.gov.au/. 
+We downloaded the variable “stream discharge (megalitres/day)” for the full dataset. We did not use the provided daily data as these include modeled interpolation data for which there was limited information, and we wanted to ensure the data used represented real, maximum stream flow discharge rates.
 
-We selected a subset of the most relevant  gauges for the GBR, which were the lowest gauges in the catchment. All have some impact on coastal communities or roads (e.g., when they flood we have parts of the Bruce Highway cut for days/weeks which impacts transport of goods incl food into NQ and FNQ).
+We selected a subset of the most relevant  gauges for the GBR, which were the lowest gauges in the catchment. 
+All have some impact on coastal communities or roads. 
+For example, when they flood parts of the main highway can be cut for days/weeks which impacts transport of goods including food into North Queensland and far North Queensland.
 
 # Results
 
 ## Case study 1
-```{r}
+```{r setup}
 #| label: get-data
 #| eval: true
 #| echo: false
@@ -153,21 +164,30 @@ hc_dat <- hc_multi_dat |> bind_rows(hc_arithmetic_dat) |>
 
 ```
 
-We found that there is substantial error when converting between the HCx and the HPx, when HCx estimates are obtained using a geometric averaging method, but there is no error when HCx estimates are obtained using model-averaged cumulative distribution function (@fig-pc-plot). Substantial error for the averaging method occurs across most of the case studies examined for the PC99 (1% effected), and always resulted in a greater number of species being effected when compared to the intended target percentage (@fig-pc-plot). From some datasets (e.g. ccme_glyphosate) the percentage of species actually effected using the averaging method was up to 3 times the target value (@fig-pc-plot). In general the error in the estimated number of species effected declines as the target percentage increases (@fig-pc-plot). For some datasets the number of species effected is actually less than the target percentage at higher  percentage values (e.g.  aims_molybdenum_marine, 5-10%).
+
+When model averaging is achieved by estimating directly from the model averaged cumulative distribution function, the correct target protection values were estimated exactly (@fig-pc-plot). 
+However, we found that there is substantial error when converting between the HCx and the HPx, when HCx estimates are obtained using a geometric averaging method, but there is no error when HCx estimates are obtained using the model-averaged cumulative distribution function (@fig-pc-plot). 
+
+Substantial error for the averaging method occurs across most of the case studies examined for the PC99 (1% effected), and always resulted in a greater number of species being effected when compared to the intended target percentage (@fig-pc-plot). 
+For some datasets (e.g. ccme_glyphosate) the percentage of species actually effected using the averaging method was up to 3 times the target value (@fig-pc-plot). 
+In general the error in the estimated number of species effected declines as the target percentage increases (@fig-pc-plot). 
+For some datasets the number of species effected is actually less than the target percentage at higher target percentage protction values (e.g.  aims_molybdenum_marine, 5-10%).
 
 ```{r}
 #| label: fig-pc-plot
-#| fig-height: 10
+#| fig-height: 8
 #| fig-width: 7
-#| fig-cap: "The ratio of estimated percentage of species effected against the target percentage of species effected, plotted against the target percentage for the arithmetic (multi_est = FALSE) and the multi (multi_est = TRUE) averaging methods."
+#| echo: false
+#| fig-cap: "The ratio of estimated percentage of species effected against the target percentage of species effected, plotted against the target percentage. Results are shown for the weighted arithmetic (arithmetic) and the model averaged cdf (averaged cdf) averaging methods."
 hc_dat |>
-  ggplot(aes(x=target_p, y=ratio, color = multi_est)) +
+  mutate(method = ifelse(multi_est==TRUE, "averaged cdf", "arithmetic")) |> 
+  ggplot(aes(x=target_p, y=ratio, color = method)) +
   geom_line() +
   scale_y_log10() +
   xlab("target % effected") +
   ylab("ratio (estimated % effected / target % effected)") +
-  facet_wrap(~dataset, ncol = 4)
-
+  facet_wrap(~dataset, ncol = 4) + 
+  theme(legend.position="bottom")
 ```
 
 ## Case study 2
@@ -222,50 +242,46 @@ hc_dat <- hc_multi_dat |> bind_rows(hc_arithmetic_dat) |>
 
 ```
 
-
-
-```{r}
-#| label: fig-c1ffd-plot
-#| fig-height: 10
-#| fig-width: 7
-#| fig-cap: "Fitted cumulative distributions for six statistical distributions, across seven example river flow datasets."
-ggarrange(plotlist = fits_dat$autoplot_f, 
-          common.legend = TRUE, ncol = 2, nrow = 4,
-          labels = fits_dat$station_id)
-```
-
-We found there could be very large deviations from the intended original target frequency when the back calculated estimated proportions were converted into the corresponding estimated frequencies (@fig-frequency-plot). In most cases, the estimated frequencies were higher than the target frequency, meaning that events were predicted to be more common than they actually were (@fig-frequency-plot). For one river, the estimated frequency was as high as 5x the original target, particularly when considering extreme rare events (for example, a one in 500 year event).
+We found there could be very large deviations from the intended original target frequency when the back calculated estimated proportions were converted into the corresponding estimated frequencies (@fig-frequency-plot). 
+In most cases, the estimated frequencies were higher than the target frequency, meaning that events were predicted to be more common than they actually were (@fig-frequency-plot). 
+For one river, the estimated frequency was as high as 5x the original target, particularly when considering extreme rare events (for example, a one in 500 year event).
 
 ```{r}
 #| label: fig-frequency-plot
-#| fig-cap: "The ratio of estimated frequency against the target frequency, plotted against the target frequency for the arithmetic (multi_est = FALSE) and the multi (multi_est = TRUE) averaging methods."
+#| echo: false
+#| fig-width: 7
+#| fig-cap: "The ratio of estimated frequency against the target frequency, plotted against the target frequency. Results are shown for the weighted arithmetic (arithmetic) and the model averaged cdf (averaged cdf) averaging methods."
 freq_ratio_plot <- hc_dat |>
-  ggplot(aes(x=target_frequency, y=ratio, color = multi_est)) +
+  mutate(method = ifelse(multi_est==TRUE, "averaged cdf", "arithmetic")) |> 
+  ggplot(aes(x=target_frequency, y=ratio, color = method)) +
   geom_line() +
   scale_y_log10() +
   xlab("target frequency") +
   ylab("ratio (estimated frequency / target frequency)") +
-  facet_wrap(~station_id)
+  facet_wrap(~station_id) +
+  theme_bw() +
+  theme(legend.position="bottom")  
 freq_ratio_plot
 ```
 
 
-
-```{r}
-#| label: demo-inline-code
-#| echo: false
-x <- round(pi, 2)
-```
-
-Here is an example of inline code `r x` in the middle of a sentence.
-
 # Discussion
+
+Our case studies showed there was a bias in model averaged estimates obtained from model averaged statistical distributions when using weighted arithmetic averaging, when compared to using a model averaged cumulative distribution function. 
+This issue is particularly problematic when the quantiles of interest lie at the tails of the distributions. 
+In the case of estimating species protection values from species sensitivity distributions, the use of a simple weighted arithmetic average will result in the derivation of guidelines values that will fail to meet the desired target 99% species protection level, which is the level currently recommended for the protection high conservation value systems in Australia [@warne_revised_2018]. 
+In our alternative case study related to stream discharge flow rates, we also found there was a tendency to overestimate the frequency of extreme events, suggesting a positive bias associated with arithmetic averaging at both the lower and upper tails of the distribution. 
+Overestimating the frequency of extreme flow events may have consequences for decision makers, resulting in over allocation of limited resources in areas that are actually less likely to be impacted than predicted.
 
 # Conclusion
 
+The inversion principle failure, and associated bias, appear to be the most severe when interest lies at the extremes tails of the statistical distributions. 
+However, the results show that the use of simple arithmetic averaging is mathematically incorrect.
+Regardless of the target application, approaches exist for estimating unbiased model averaged estimates for statistical distributions that do meet the inversion principle, and we urge researchers to move towards methods and tools that are mathematically and statistically correct, and provide robust inference in important decision context.
+
 # Acknowledgements
 
-<!-- The following line inserts a page break  -->
+We acknowledge contributions from Angeline Tillmanns, Seb Dalgarno, Kathleen McTavish, Heather Thompson, Doug Spry, Rick van Dam, Graham Batley, and Ali Azizisharzi. This work was funded by the Department of Climate Change, Energy, the Environment and Water, Australia.
 
 \newpage
 
@@ -280,7 +296,7 @@ Here is an example of inline code `r x` in the middle of a sentence.
 
 ### Colophon
 
-This report was generated on `r Sys.time()` using the following computational environment and dependencies:
+This draft was generated on `r Sys.time()` using the following computational environment and dependencies:
 
 ```{r}
 #| label: colophon
