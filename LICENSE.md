@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2025 rfisher@aims.gov.au
+Copyright (c) 2025 david.fox@environmetrics.net.au, rfisher@aims.gov.au, joe@poissonconsulting.com.au
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
