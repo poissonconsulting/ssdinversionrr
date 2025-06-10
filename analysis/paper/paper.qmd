@@ -65,11 +65,16 @@ In many situations, the appropriate statistical distribution to use is not clear
 
 The weighted arithmetic mean is conventionally used for averaging model parameters or estimates [@burnham_model_2002]. 
 However, in the case of $\text{HC}_x$ and $\text{HP}_u$ values, the estimator $\widetilde{\text{HC}}_x$ fails to satisfy the *inversion principle* [@fox_methodologies_2024] which requires 
-$$\left[ \text{HP}_u \right]_{u = \text{HC}_\theta } = \theta$$
+
+$$\left[ \text{HP}_u \right]_{u = \text{HC}_\theta } = \theta$$ {#eq-inv-princ}
+
+
 This inconsistency has been rectified in `ssdtools` v2 [@thorley_ssdtools_2025] by estimating the model-averaged $\text{HC}_x$ (denoted $\widehat{\text{HC}}_x$) directly from the model-averaged cumulative distribution function (*cdf*) 
-$$G\left( u \right) = \sum\limits_{i = 1}^m w_i F_i\left( u \right)$$
+$$G\left( u \right) = \sum\limits_{i = 1}^m w_i F_i\left( u \right)$$ {#eq-ma-cdf}
+
+
 where ${F_i}\left(  \cdot  \right)$ is the *cdf* for the the *i^th^* model and $w_i$ is the model weight as before. $\widehat{\text{HC}}_x$ is then obtained as the solution to
-$${u:G\left( u \right) = x}$$ 
+$${u:G\left( u \right) = x}$$ {#eq-ma-est}
 or, equivalently
 $$u:G\left( u \right) - x = 0$$ 
 for the proportion affected $x$. 
@@ -80,7 +85,7 @@ Here we demonstrate the potential error that may be introduced by the failure of
 
 ## Case study 1 - Species sensitivity distribution (SSD) modelling
 
-We used the example datasets in the ssddata package in R (Fisher & Thorley 2021) to examine the range of differences in estimated model averaged HCx values when calculated using a weighted arithmetic mean (default method for ssdtools versions 0 and 1) relative to the values obtained by estimating the model-averaged HC directly from the model-averaged cumulative distribution function (see equation XX above). 
+We used the example datasets in the ssddata package in R (Fisher & Thorley 2021) to examine the range of differences in estimated model averaged HCx values when calculated using a weighted arithmetic mean (default method for ssdtools versions 0 and 1) relative to the values obtained by estimating the model-averaged HC directly from the model-averaged cumulative distribution function (see equation @eq-inv-princ above). 
 
 To run the case studies, data were first extracted from ssddata [@ssddata] using the function get_ssddata. These were then fit using ssdtools version 2.0 [@thorley_ssdtools_2025], via the ssd_fit_dists function,  using the lognormal, loglogistic, log Gumbel, Weibull, gamma and lognormal-lognormal mixture distributions. While there are other distributions available in ssdtools, this set represents the recommended set of stable distributions (Fox et al. 2024). 
 
@@ -99,7 +104,7 @@ We selected a subset of the most relevant  gauges for the GBR, which were the lo
 #| label: get-data
 #| eval: true
 #| echo: false
-# Note the path that we need to use to access our data files when rendering this document
+
 library(ggplot2)
 library(ssdtools)
 library(dplyr)
