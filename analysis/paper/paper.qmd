@@ -1,51 +1,57 @@
 ---
 title: "Model averaging statistical distributions and the inversion principle"
 author:
-  - David Fox:
-      correspondence: "yes"
-      email: david.fox@environmetrics.net.au
-      orcid: 0000-0002-3178-7243
-      institute:
-        - fosg
-        - fop
-  - Rebecca Fisher:
-      institute: 
-        - aims
-        - iormc
-      orcid: 0000-0001-5148-6731
-  - Joe Thorley:
-      orcid: 0000-0002-7683-4592
-institute:
-  - fosg: The University of Melbourne, Australia
-  - fop: Environmetrics Australia, Australia
-  - aims: Australian Institute of Marine Science, Australia
-  - iomrc: Oceans Institute, The University of Western Australia, Australia
-title-block-published: "Last updated"  
-date: now
+  - name: "David Fox"
+    corresponding: true
+    email: "david.fox@environmetrics.net.au"
+    orcid: "0000-0002-3178-7243"
+    affiliations: [fosg, fop]
+  - name: "Rebecca Fisher"
+    orcid: "0000-0001-5148-6731"
+    affiliations: [aims, iomrc]
+  - name: "Joe Thorley"
+    orcid: "0000-0002-7683-4592"
+affiliations:
+  - id: fosg
+    name: "The University of Melbourne, Australia"
+  - id: fop
+    name: "Environmetrics Australia, Australia"
+  - id: aims
+    name: "Australian Institute of Marine Science, Australia"
+  - id: iomrc
+    name: "Oceans Institute, The University of Western Australia, Australia"
+date: today
 date-format: long
-format: 
-  docx:
-    reference-doc: "../templates/template.docx" # Insert path for the DOCX file
-execute:
-  echo: true
-  warning: false
-  message: false
-  comment: "#>"
-  fig-path: "../figures/"
-  fig-dpi: 600
-filters:
-  - ../templates/scholarly-metadata.lua
-  - ../templates/author-info-blocks.lua
-  - ../templates/pagebreak.lua
+title-block-published: "Last updated"
+
+format:
+  pdf:
+    number-depth: 2
+    documentclass: article
+#    classoption: fleqn
+    geometry: margin=1in
+    papersize: a4
+    pdf-engine: xelatex
+    keep-tex: true
+    toc: false
+    math:
+      number: true      # Enable equation numbering
+      labels: all       # Number all equations
+      section: false    # Don't use section numbers (e.g., just (1), (2), ...)
 bibliography: references.bib
-csl: "../templates/journal-of-archaeological-science.csl" # Insert path for the bib-style
+mainfont: "Latin Modern Roman"
+csl: "../templates/journal-of-archaeological-science.csl"
 abstract: |
   Text of abstract
 keywords: |
   model averaging; AICc weights; statistical distribution
 highlights: |
-  This paper descibes how typical arithmetic averaging of statistical distributions fails to satisfy the inversion princple and provides an alternative method for obtaining model averaged values from the extremes of statistical distributions. 
+  This paper describes how typical arithmetic averaging of statistical distributions fails to satisfy the inversion principle and provides an alternative method for obtaining model averaged values from the extremes of statistical distributions.
 ---
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
 
 <!-- This is the format for text comments that will be ignored during renderings. Do not put R code in these comments because it will not be ignored. -->
 
@@ -58,33 +64,68 @@ Highlights: `r rmarkdown::metadata$highlights`
 <!-- The actual document text starts here: -->
 
 # Introduction
-
 Statistical distributions are widely used across all fields of science to provide probabilistic estimates that are critical for scientific inference, and more importantly in a range of decision science frameworks. 
-For example, the species sensitivity distribution (SSD) is used in the Australian [@warne_revised_2018] and Canadian water quality frameworks to determine concentrations that are protection of most species within an ecosystem. 
-In this case regulators are typically interested in the lower tails of the statistical distribution, such as the 1th, 5th and 10th percentile, which would represent concentrations protective of 99, 95 and 90% of the ecosystem. 
-Another example is in maximum streamflow estimations sometimes used in risk management of hydraulic structures, which may be more interested in the extreme upper tails of a statistical distribution, that represent rare events, such a 1 in 100 year, 1 in 200 year, or 1 in 500 year frequency [@bento_improved_2023].
+For example, the species sensitivity distribution (SSD) is widely used in Australia, New Zealand, Canada, and the European Union to determine concentrations that are protective of most species within an ecosystem.
+In this case regulators are typically interested in the lower tails of the statistical distribution, such as the 1st, 5th and 10th percentiles, which would represent concentrations protective of 99, 95 and 90% of the ecosystem. 
+Another example is in maximum streamflow estimations sometimes used in risk management of hydraulic structures, where interest centres on the extreme upper tails of a statistical distribution, that represent rare events, such a 1 in 100 year, 1 in 200 year, or 1 in 500 year frequency [@bento_improved_2023].
 
-In many situations, the appropriate statistical distribution to use is not clear, and there is no theoretically correct distribution. 
-Uncertainty in the appropriate theoretical distribution has lead to an increasing popularity in the use of model averaging [@burnham_model_2002]. 
-Typically, model averaging is carried out by calculating an arithmetic  average of the value of interest, usually weighted according to the relative AICc weights of input distributions [@bento_improved_2023, @thorley_ssdtools_2018].
+The choice of an appropriate statistical distribution to use is not always clear. In some situations, the choice of a suitable probability model is guided by theoretical considerations such as the Central Limit Theorem (CLT) in statistics which justifies the use of normal distributions when dealing with the aggregation of data values. In other cases, the use of a particular distributional form is supported by a wealth of empirical evidence – for example: the log-distribution in hydrology; the Poisson distribution to model random events in time and/or space, the normal distribution in medicine and the gamma distribution in the study of queues. 
+Examples in ecotoxicology that leverage support from either theory or evidence are relatively less common with the notable exception of toxicokinetic/toxicodynamic (TK/TD) modelling where the Weibull and log-normal distributions have both theoretical and empirical underpinnings in stochastic death (SD) and individual tolerance (IT) models [@jager2011guts]. 
 
-The weighted arithmetic mean is conventionally used for averaging model parameters or estimates [@burnham_model_2002]. 
-However, in the case of $\text{HC}_x$ and $\text{HP}_u$ values, the estimator $\widetilde{\text{HC}}_x$ fails to satisfy the *inversion principle* [@fox_methodologies_2024] which requires 
+In species sensitivity modelling, the choice of the most appropriate (single) statistical distribution is a particularly vexing issue. This choice is hampered by a lack of any guiding statistical or biological theory and a plethora of confusing and equivocal empirical studies in support of one distributional form or another [@Fox2016;@Fox2021;@Yanagihara2024;@Yanagihara2025]. The situation is often not resolved by statistical goodness-of-fit tests and attempts to identify a single ‘best’ distribution are fraught. 
 
-$$\left[ \text{HP}_u \right]_{u = \text{HC}_\theta } = \theta$$ {#eq-inv-princ}
+Model selection accounts for uncertainty: alternative plausible models often fit the data nearly equally well [@Fox2016;@Chapman2007] but yield substantively different estimates. Ignoring model uncertainty by selecting a single distribution is likely to underestimate the true variability in the final risk estimate and can potentially result in biased estimates. Model averaging addresses this by combining estimates across models using weights that reflect each model’s relative support in the data [@burnham_model_2002].
+
+Model averaging is not new. Its theoretical roots extend back to the 1970s and 1980s, particularly in the fields of forecasting and econometrics, where researchers recognised that averaging across competing models often yields better predictive performance than relying on a single best-fitting model [@Granger1984;@Bates1969]. Akaike’s development of the Akaike Information Criterion (AIC) in the early 1970s laid the foundation for frequentist model selection and model averaging, emphasizing predictive accuracy over strict hypothesis testing [@Akaike1973]. Building on this, Burnham and Anderson (2002) synthesized and extended these ideas into a formal framework for multimodel inference, advocating for the use of model averaging to account for model uncertainty in both estimation and prediction. Bayesian model averaging (BMA) was also formalized in the 1990s [@Raftery1997] and has since become widely used in applications ranging from genomics to climate modelling and epidemiology. The recent uptake of model averaging in ecotoxicology reflects this broader shift across disciplines toward acknowledging and incorporating model uncertainty in scientific inference.
+
+Recent work in ecotoxicology has increasingly emphasized model averaging (MA) as a robust alternative to single-model approaches in dose-response (D-R) modelling, species sensitivity distributions (SSDs) and benchmark dose (BMD) estimation. In SSD analysis, MA combines estimates from multiple plausible distributions (e.g., log-normal, log-logistic, Burr Type III, Weibull), providing more robust $HC_5$ estimates and explicitly accounting for model-form uncertainty—especially under sparse or heterogeneous data. This approach is supported in regulatory and research contexts by tools such as the USEPA SSD Toolbox [@epa_ssdtoolbox], the R packages ssdtools [@thorley_ssdtools_2025], drc [@Ritz2015], and `bayesnec` [@Fisher2024]. 
+
+In parallel, model averaging has been increasingly applied in BMD modelling, where it addresses uncertainty in dose-response model selection and improves the robustness of BMD and BMDL estimates. Companion software such as the US EPA’s BMDS (Benchmark Dose Software) [@USEPA2023] and RIVM’s software tool, PROAST [@rivm_proast] incorporate model averaging functionality, allowing for probabilistic inference across competing models. These advances support the use of model-averaged inference as best practice in ecological risk assessment and regulatory ecotoxicology [@fox_methodologies_2024;@USEPA2023].
+
+In the next section we discuss an important, although apparently not widely appreciated quirk of model averaged SSDs which negates the use of averaging across individual $HC_x$ estimates. 
+
+A critical but often overlooked flaw in conventional model averaging of statistical distributions is that the resulting estimator of $HC_x$ typically fails to satisfy what has been referred to as the *inversion principle* [@fox_methodologies_2024]. Mathematically, this requires: 
+
+$$
+FA(HC_x) \equiv 100x\%
+$$ {#eq-inv-princ}
 
 
-This inconsistency has been rectified in `ssdtools` v2 [@thorley_ssdtools_2025] by estimating the model-averaged $\text{HC}_x$ (denoted $\widehat{\text{HC}}_x$) directly from the model-averaged cumulative distribution function (*cdf*) 
-$$G\left( u \right) = \sum\limits_{i = 1}^m w_i F_i\left( u \right)$$ {#eq-ma-cdf}
+In words, the inversion principle says that for the $HC_x$ to be a legitimate percentile from some SSD, the fraction of species affected (FA) at $HC_x$ must be $(100x)$% when evaluated from the same SSD. Even when model averaging is correctly weighted (e.g. by AIC$_c$ weights; see Thorley & Schwarz, 2018), computing the model-averaged estimate as the weighted average of individual quantiles,
 
+$$
+\widehat{\mathrm{HC}}_x = \sum_{i=1}^m w_i \, F_i^{-1}(x)
+$$
 
-where ${F_i}\left(  \cdot  \right)$ is the *cdf* for the the *i^th^* model and $w_i$ is the model weight as before. $\widehat{\text{HC}}_x$ is then obtained as the solution to
-$${u:G\left( u \right) = x}$$ {#eq-ma-est}
-or, equivalently
-$$u:G\left( u \right) - x = 0$$ 
-for the proportion affected $x$. 
+does **not** generally yield the same result as inverting the model-averaged cumulative distribution function:
 
-Here we demonstrate the potential error that may be introduced by the failure of arithmetic model averaging to satisfy the inversion principle, and make a call for the scientific community to lean on the technological advances that ensure model averaging of extreme estimates from statistical distributions is done correctly.
+$$
+\widehat{\mathrm{HC}}_x = G^{-1}(x), \quad \text{where} \quad G(u) = \sum_{i=1}^m w_i \, F_i(u).
+$$
+
+This discrepancy arises because **quantile and mixture operations do not commute**, as demonstrated analytically in Appendix A. Specifically, we show that unless all component distributions $F_i$ are identical or the quantile index $x$ corresponds to a point of linear coincidence among them, the following inequality generally holds:
+
+$$
+G^{-1}(x) \ne \sum w_i \, F_i^{-1}(x).
+$$
+
+This failure of the inversion principle means that the arithmetic average of HC$_x$ values is **not** a valid estimate of the HC$_x$ for the model-averaged distribution.
+
+This inconsistency has been resolved in version 2 of the `ssdtools` R package [@ssdtoolsv2], which now computes $\widehat{\mathrm{HC}}_x$ by solving for the quantile $u^*_x$ that satisfies:
+
+$$
+G(u^*_x) = x,
+$$
+
+and defining:
+
+$$
+\widehat{\mathrm{HC}}_x := u^*_x.
+$$
+
+This approach ensures that $\widehat{\mathrm{HC}}_x$ is a true quantile of the model-averaged distribution and thus satisfies the inversion principle by construction. We argue that model-averaging procedures which fail to adhere to this principle may lead to unrepresentative or biased estimates, and the results presented in Appendix A provide a rigorous basis for preferring the inversion-consistent formulation.
+
+The only currently available software tool that implements model-averaged SSDs is `ssdtools`. The USEPA software tool `ssdtoolbox` [@epa_ssdtoolbox] has no *intrinsic* model-averaging capability, although the version 1.0 companion technical manual discusses SSD model-averaging but incorrectly states that model-averaged estimates of the $HC_x$ may be calculated using $\overline {H{C_x}}  = \sum\nolimits_{j = 1}^m {{w_j}} H{C_{{x_j}}}$ (Equation 9) [@Etterson2020].
 
 # Methods
 
@@ -127,40 +168,52 @@ library(ssddata)
 
 pc_vec <- c(1:20)/100
 
-unused_dat <- c("ssd_fits", "aims_data", "anon_data", "csiro_data",  "ccme_data", "anzg_data")
-ssd_data <- data(package="ssddata")$results |>
-  data.frame() |>
-  dplyr::select(dataset=Item) |>
-  dplyr::filter(!(dataset %in% unused_dat)) |>
-  dplyr::nest_by(dataset) |>
-  dplyr::mutate(data=list(get_ssddata(dataset)),
-                nsp=nrow(data),
-                fit=list(ssdtools::ssd_fit_dists(data, left="Conc")),
-                hc_multi=list(ssdtools::ssd_hc(fit, proportion=pc_vec)),
-                hc_arithmetic=list(ssdtools::ssd_hc(fit, proportion=pc_vec, multi_est = FALSE)),
-                gof=list(ssdtools::ssd_gof(fit)),
-                autoplot_f = list(autoplot_fun(fit, dataset, plot.tag.position = c(0.2, 0.95))))
+unused_dat <- c("ssd_fits", "aims_data", "anon_data", "csiro_data", "ccme_data", "anzg_data")
+
+ssd_data <- suppressMessages({
+  data(package = "ssddata")$results |>
+    data.frame() |>
+    dplyr::select(dataset = Item) |>
+    dplyr::filter(!(dataset %in% unused_dat)) |>
+    dplyr::nest_by(dataset) |>
+    dplyr::mutate(
+      data = list(get_ssddata(dataset)),
+      nsp = nrow(data),
+      fit = list(ssdtools::ssd_fit_dists(data, left = "Conc")),
+      hc_multi = list(ssdtools::ssd_hc(fit, proportion = pc_vec, est_method = "multi")),
+      hc_arithmetic = list(ssdtools::ssd_hc(fit, proportion = pc_vec, est_method = "arithmetic")),
+      gof = list(ssdtools::ssd_gof(fit, wt = TRUE)),   # ✅ updated
+      autoplot_f = list(autoplot_fun(fit, dataset, plot.tag.position = c(0.2, 0.95)))
+    )
+})
 
 gof_dat <- ssd_data |>
   tidyr::unnest(gof) |>
-  select(dataset, data, nsp,fit, weight, dist)
+  select(dataset, data, nsp, fit, wt, dist)   # ✅ use `wt` not `weight`
 
-hc_multi_dat <-  ssd_data |>
+hc_multi_dat <- ssd_data |>
   tidyr::unnest(hc_multi) |>
-  mutate(multi_est = TRUE)
+  mutate(est_method = "multi")
 
-hc_arithmetic_dat <-  ssd_data |>
+hc_arithmetic_dat <- ssd_data |>
   tidyr::unnest(hc_arithmetic) |>
-  mutate(multi_est = FALSE)
+  mutate(est_method = "arithmetic")
 
-hc_dat <- hc_multi_dat |> bind_rows(hc_arithmetic_dat) |>
-  dplyr::select(dataset, est_conc=est, target_p = proportion, fit, multi_est) |>
-  mutate(estimated_p = purrr::pmap(list(x=.data$fit, conc=.data$est_conc, multi_est=.data$multi_est), ssd_hp)) |>
-  unnest(estimated_p) |>
-  select(dataset, est_conc, target_p, est_p = est, multi_est) |>
-  mutate(target_p=target_p*100, 
-         est_p = est_p,
-         ratio=est_p/target_p)
+hc_dat <- bind_rows(hc_multi_dat, hc_arithmetic_dat) |>
+  dplyr::select(dataset, est_conc = est, target_p = proportion, fit, est_method) |>
+  mutate(
+    estimated_p = purrr::pmap(
+      list(x = .data$fit, conc = .data$est_conc, est_method = .data$est_method),
+      ~ ssd_hp(x = ..1, conc = ..2, est_method = ..3, proportion = FALSE)  # ✅ updated
+    )
+  ) |>
+  unnest(estimated_p, names_sep = "_") |>
+  select(dataset, est_conc, target_p, est_p = estimated_p_est, est_method) |>
+  mutate(
+    target_p = target_p * 100,   # still valid since proportion=FALSE gives % scale
+    ratio = est_p / target_p
+  )
+
 
 ```
 
@@ -179,15 +232,22 @@ For some datasets the number of species effected is actually less than the targe
 #| fig-width: 7
 #| echo: false
 #| fig-cap: "The ratio of estimated percentage of species effected against the target percentage of species effected, plotted against the target percentage. Results are shown for the weighted arithmetic (arithmetic) and the model averaged cdf (averaged cdf) averaging methods."
+
 hc_dat |>
-  mutate(method = ifelse(multi_est==TRUE, "averaged cdf", "arithmetic")) |> 
-  ggplot(aes(x=target_p, y=ratio, color = method)) +
+  mutate(
+    method = case_when(
+      est_method == "multi" ~ "averaged cdf",
+      est_method == "arithmetic" ~ "arithmetic"
+    )
+  ) |>
+  ggplot(aes(x = target_p, y = ratio, color = method)) +
   geom_line() +
   scale_y_log10() +
   xlab("target % effected") +
   ylab("ratio (estimated % effected / target % effected)") +
-  facet_wrap(~dataset, ncol = 4) + 
-  theme(legend.position="bottom")
+  facet_wrap(~dataset, ncol = 4) +
+  theme(legend.position = "bottom")
+
 ```
 
 ## Case study 2
@@ -211,34 +271,43 @@ frequency_vec <- c(1, 5, 10, 50, 100, 500, 1000)
 
 fits_dat <- flodata |>
   dplyr::nest_by(station_id) |>
-  dplyr::mutate(nyear=nrow(data),
-                fit=list(ssdtools::ssd_fit_dists(data, left="flow")),
-                hc_multi=list(ssdtools::ssd_hc(fit, proportion=1-1/frequency_vec)),
-                hc_arithmetic=list(ssdtools::ssd_hc(fit, proportion=1-1/frequency_vec, multi_est = FALSE)),
-                gof=list(ssdtools::ssd_gof(fit)),
-                autoplot_f = list(autoplot_fun(fit, station_id, plot.tag.position = c(0.2, 0.95))))
+  dplyr::mutate(
+    nyear = nrow(data),
+    fit = list(ssdtools::ssd_fit_dists(data, left = "flow")),
+    hc_multi = list(ssdtools::ssd_hc(fit, proportion = 1 - 1 / frequency_vec, est_method = "multi")),
+    hc_arithmetic = list(ssdtools::ssd_hc(fit, proportion = 1 - 1 / frequency_vec, est_method = "arithmetic")),
+    gof = list(ssdtools::ssd_gof(fit)),
+    autoplot_f = list(autoplot_fun(fit, station_id, plot.tag.position = c(0.2, 0.95)))
+  )
 
 gof_dat <- fits_dat |>
   tidyr::unnest(gof) |>
-  select(station_id, data, nyear,fit, weight, dist)
+  select(station_id, data, nyear, fit, weight, dist)
 
-hc_multi_dat <-  fits_dat |>
+hc_multi_dat <- fits_dat |>
   tidyr::unnest(hc_multi) |>
-  mutate(multi_est = TRUE)
+  mutate(est_method = "multi")
 
-hc_arithmetic_dat <-  fits_dat |>
+hc_arithmetic_dat <- fits_dat |>
   tidyr::unnest(hc_arithmetic) |>
-  mutate(multi_est = FALSE)
+  mutate(est_method = "arithmetic")
 
-hc_dat <- hc_multi_dat |> bind_rows(hc_arithmetic_dat) |>
-  dplyr::select(station_id, est_conc=est, target_p = proportion, fit, multi_est) |>
-  mutate(estimated_p = purrr::pmap(list(x=.data$fit, conc=.data$est_conc, multi_est=.data$multi_est), ssd_hp)) |>
-  unnest(estimated_p) |>
-  select(station_id, est_conc, target_p, est_p = est, multi_est) |>
-  mutate(est_p = est_p/100,
-         estimated_frequency = (1-est_p)^-1,
-         target_frequency = round((1-target_p)^-1),
-         ratio=estimated_frequency/target_frequency)
+hc_dat <- bind_rows(hc_multi_dat, hc_arithmetic_dat) |>
+  dplyr::select(station_id, est_conc = est, target_p = proportion, fit, est_method) |>
+  mutate(
+    estimated_p = purrr::pmap(
+      list(x = .data$fit, conc = .data$est_conc, est_method = .data$est_method),
+      ~ ssd_hp(x = ..1, conc = ..2, est_method = ..3)
+    )
+  ) |>
+  unnest(estimated_p, names_sep = "_") |>
+  select(station_id, est_conc, target_p, est_p = estimated_p_est, est_method) |>
+  mutate(
+    est_p = est_p / 100,
+    estimated_frequency = (1 - est_p)^-1,
+    target_frequency = round((1 - target_p)^-1),
+    ratio = estimated_frequency / target_frequency
+  )
 
 ```
 
@@ -251,17 +320,25 @@ For one river, the estimated frequency was as high as 5x the original target, pa
 #| echo: false
 #| fig-width: 7
 #| fig-cap: "The ratio of estimated frequency against the target frequency, plotted against the target frequency. Results are shown for the weighted arithmetic (arithmetic) and the model averaged cdf (averaged cdf) averaging methods."
+
 freq_ratio_plot <- hc_dat |>
-  mutate(method = ifelse(multi_est==TRUE, "averaged cdf", "arithmetic")) |> 
-  ggplot(aes(x=target_frequency, y=ratio, color = method)) +
+  mutate(
+    method = case_when(
+      est_method == "multi" ~ "averaged cdf",
+      est_method == "arithmetic" ~ "arithmetic"
+    )
+  ) |>
+  ggplot(aes(x = target_frequency, y = ratio, color = method)) +
   geom_line() +
   scale_y_log10() +
   xlab("target frequency") +
   ylab("ratio (estimated frequency / target frequency)") +
   facet_wrap(~station_id) +
   theme_bw() +
-  theme(legend.position="bottom")  
+  theme(legend.position = "bottom")
+
 freq_ratio_plot
+
 ```
 
 
@@ -284,6 +361,348 @@ Regardless of the target application, approaches exist for estimating unbiased m
 We acknowledge contributions from Angeline Tillmanns, Seb Dalgarno, Kathleen McTavish, Heather Thompson, Doug Spry, Rick van Dam, Graham Batley, and Ali Azizisharzi. This work was funded by the Department of Climate Change, Energy, the Environment and Water, Australia.
 
 \newpage
+
+# Appendix A: Non-commutativity of quantile and mixture operations 
+
+::: {.cell}
+```{=latex}
+\setcounter{equation}{0}
+\renewcommand{\theequation}{A\arabic{equation}}
+```
+:::
+
+
+We wish to prove that the quantile of a *mixture distribution* is not equal to the same mixture of the individual quantiles. That is:
+
+Letting $G\left( x \right) = \sum\limits_{i = 1}^k {{w_i}} {F_i}\left( x \right){\text{  with  }}{w_i} \geqslant 0{\text{  and  }}\sum\limits_{i = 1}^k {{w_i}}  = 1$, where the ${F_i}\left( x \right)$ are *cdf*s, prove, that in general:
+
+\begin{equation}
+G^{-1}(p) \ne \sum_{i = 1}^k w_i F_i^{-1}(p)
+\end{equation}
+
+Our proof is in two parts: (i) we first prove Equation 1 for the specific case of *k = 2* and then (ii) use induction to prove Equation 1 for *any k*.
+
+## Proof : *k = 2*
+Let $F_1(x), F_2(x)$ be any two cumulative distribution functions (*cdf*s) and define:
+
+- $G(x) = w_1 F_1(x) + w_2 F_2(x)$, with $w_1, w_2 > 0$ and $w_1 + w_2 = 1$,  
+- $u_{1,p} := F_1^{-1}(p)$, $u_{2,p} := F_2^{-1}(p)$,  
+- $\psi_p := G^{-1}(p)$,  
+
+and the weighted average of quantiles:
+  $$
+  u_p^* := w_1 u_{1,p} + w_2 u_{2,p}.
+  $$
+  
+We want to prove:
+$$
+\text{In general, } \psi_p \ne u_p^*.
+$$
+
+## Proof by Contradiction
+Assume for contradiction that:
+$$
+\psi_p = u_p^* := w_1 u_{1,p} + w_2 u_{2,p}.
+$$
+
+By definition of quantile:
+$$
+G(u_p^*) = w_1 F_1(u_p^*) + w_2 F_2(u_p^*) \ge p,
+$$
+
+and for all $x < u_p^*$:
+
+$$
+G(x) < p.
+$$
+
+Now, suppose $F_1$ and $F_2$ are strictly increasing and continuous, and that $F_1^{-1}(p) \ne F_2^{-1}(p)$ (i.e., the p-th quantiles differ).
+
+Assume without loss of generality that $u_{1,p} < u_{2,p}$, hence:
+$$
+u_p^* \in (u_{1,p}, u_{2,p}).
+$$
+
+Then:
+
+- Since $F_1$ is strictly increasing, $F_1(u_p^*) > F_1(u_{1,p}) = p$,
+- Since $F_2$ is strictly increasing, $F_2(u_p^*) < F_2(u_{2,p}) = p$.
+
+Thus:
+$$
+F_2(u_p^*) < p < F_1(u_p^*),
+$$
+
+and the mixture at $u_p^*$ is:
+$$
+G(u_p^*) = w_1 F_1(u_p^*) + w_2 F_2(u_p^*).
+$$
+
+Then:
+$$\begin{array}{*{20}{l}}
+{G(u_p^*) - p}&{ = {w_1}{F_1}(u_p^*) + {w_2}{F_2}(u_p^*) - p}\\
+\\
+{}&{ = {w_1}{F_1}(u_p^*) + {w_2}{F_2}(u_p^*) - ({w_1} + {w_2})p}\\
+\\
+{}&{ = {w_1}[{F_1}(u_p^*) - p] + {w_2}[{F_2}(u_p^*) - p]}
+\end{array}$$
+
+Note that:
+
+- $F_1(u_p^*) - p > 0$,
+- $F_2(u_p^*) - p < 0$,
+
+so the signs of the weighted deviations oppose. Therefore:
+$$\begin{array}{l}
+G(u_p^*) = p\\
+\\
+ \Rightarrow G(u_p^*) - p = 0\\
+\\
+ \Rightarrow \frac{{{F_2}(u_p^*) - p}}{{p - {F_1}(u_p^*)}} = \frac{{{w_1}}}{{{w_2}}}
+\end{array}$$
+
+This equation generally does **not** hold unless $w_1$, $w_2$ are **tuned exactly** to the shapes of $F_1$ and $F_2$. That is, Equation 1 only holds if there exists $w_1$ such that
+
+\begin{equation}
+\frac{{p - {F_2}(u_p^*)}}{{{F_1}(u_p^*) - p}} = \frac{{{w_1}}}{{1 - {w_1}}}
+\end{equation}
+
+In most instances,there is no $w_1$ that satisfies Equation 2 (see Example below).
+Hence, in general:
+$$
+G(u_p^*) \ne p \Rightarrow \psi_p \ne u_p^*.
+$$
+
+## Inductive Generalization : *k > 2*
+
+Assume the result holds for mixtures of $k$ distributions:
+$$
+G_k(x) = \sum_{i=1}^k w_i F_i(x) \Rightarrow G_k^{-1}(p) \ne \sum_{i=1}^k w_i F_i^{-1}(p).
+$$
+
+For $k+1$ components:
+Let $\bar{w} := \sum_{i=1}^{k} w_i < 1$ and define:
+$$
+H_k(x) := \frac{1}{\bar{w}} \sum_{i=1}^{k} w_i F_i(x),
+$$
+
+so that:
+$$
+G_{k+1}(x) = \bar{w} H_k(x) + (1 - \bar{w}) F_{k+1}(x).
+$$
+
+By the $k = 2$ case, applied to $H_k$ and $F_{k+1}$, we have:
+$$
+G_{k+1}^{-1}(p) \ne \bar{w} H_k^{-1}(p) + (1 - \bar{w}) F_{k+1}^{-1}(p),
+$$
+
+but this equals $\sum_{i=1}^{k+1} w_i F_i^{-1}(p)$.
+Hence, by induction:
+$$
+\boxed{G^{-1}(p) \ne \sum_{i=1}^k w_i F_i^{-1}(p) \quad \text{in general}.}
+$$
+
+\begin{center}
+\underline {Thus, unlike expectations, quantiles are not linear under mixtures}.
+\end{center}
+
+## Example: When the Quantile of the Mixture Equals the Mixture of Quantiles
+### Setup
+Let:
+
+- $F_1(x) = x$ on $[0,1]$ (Uniform[0,1]),
+- $F_2(x) = x^2$ on $[0,1]$ (Beta(2,1)),
+- Let $p = 0.3$,
+
+Then:
+
+- $u_{1,p} = F_1^{-1}(0.3) =$  `r qunif(0.3)`,
+- $u_{2,p} = F_2^{-1}(0.3) =$  `r qbeta(0.3,2,1)`
+
+Let:
+
+$$u_p^* = w_1 u_{1,p} + w_2 u_{2,p}, \quad \text{where } w_2 = 1 - w_1.$$
+We want to solve for $w_1 \in (0,1)$ such that:
+
+$$G(u_p^*) = p = 0.3,$$
+where $$G(x) = w_1 F_1(x) + w_2 F_2(x) = w_1 x + w_2 x^2.$$
+---
+
+###  Step 1: Express $u_p^*$ in Terms of $w_1$
+
+Define:
+
+- $a = 0.3$,
+- $b = \sqrt{0.3} \approx 0.5477$,
+
+Then:
+
+$$u = w_1 a + (1 - w_1) b = b + w_1(a - b)$$
+Now plug into:
+$$G(u) = w_1 u + (1 - w_1) u^2 = 0.3$$
+
+---
+
+###  Step 2: Rearranged as a Quadratic in $u$
+
+We write:
+
+$$(1 - w_1) u^2 + w_1 u - 0.3 = 0$$
+
+Apply the quadratic formula:
+$$u = \frac{-w_1 + \sqrt{w_1^2 + 4(1 - w_1)(0.3)}}{2(1 - w_1)}$$
+
+Now equate this to the weighted quantile average:
+$$u = w_1 \cdot 0.3 + (1 - w_1) \cdot \sqrt{0.3} = b + w_1(a - b)$$
+
+So we solve:
+$$\frac{-w_1 + \sqrt{w_1^2 + 2(1 - w_1)}}{2(1 - w_1)} = b + w_1(a - b)$$
+
+---
+
+###  R Code to Solve for $w_1$
+
+```{r}
+a <- 0.3
+b <- sqrt(0.3)
+
+lhs <- function(w1) {
+  num <- -w1 + sqrt(w1^2 + 4 * (1 - w1) * a)
+  den <- 2 * (1 - w1)
+  result <- num / den
+  result[den == 0] <- NA
+  return(result)
+}
+
+rhs <- function(w1) {
+  return(w1 * a + (1 - w1) * b)
+}
+
+f <- function(w1) lhs(w1) - rhs(w1)
+
+w1 <- uniroot(f, c(0.01, 0.99))$root
+```
+
+###  Output (Approximate)
+
+- $w_1^* \approx 0.3853$
+
+---
+
+###  Now Check:
+```{r}
+cat("\n","w1 = ",w1)
+
+## ---------  Check  ----------
+
+u <- w1*qunif(0.3) + (1-w1)*qbeta(0.3,2,1)
+cat("\n","\n","u = ",u)
+
+ma <- w1*punif(u) + (1-w1)*pbeta(u,2,1)
+cat("\n","\n","G(u) = ",ma)
+
+```
+
+$$u_p^* = 0.3853 \cdot 0.3 + (1 - 0.3853) \cdot \sqrt{0.3} \approx 0.4523$$
+
+$$G(u_p^*) = 0.3853 \cdot 0.4523 + 0.6147 \cdot (0.4523)^2 = 0.30002$$
+
+---
+
+###  Conclusion
+
+In the special case $p = 0.3$, using:
+
+- $u_{1,p} = 0.3$,
+- $u_{2,p} = \sqrt{0.3} \approx 0.5477$,
+
+we find:
+
+- $w_1 \approx 0.3853$,
+- $w_2 \approx 0.6147$,
+
+such that:
+$$
+G^{-1}(0.5) = u_p^* = w_1 u_{1,p} + w_2 u_{2,p}
+$$
+
+But again, this equality is only true because the weights were **tuned** to force it — confirming the general result that:
+$$G^{-1}(p) \ne \sum w_i F_i^{-1}(p) \quad \text{in general}.$$
+
+---
+
+## Failure Case: No Solution for $p = 0.1$
+
+In this example, we attempt to solve:
+$$G(u_p^*) = 0.1\quad where\quad u_p^* = {w_1} \cdot {u_{1,p}} + (1 - {w_1}) \cdot {u_{2,p}}$$
+with:
+
+- $F_1(x) = x$, $F_2(x) = x^2$,
+- $u_{1,p} = 0.1$, $u_{2,p} = \sqrt{0.1} \approx 0.3162$,
+- $G(x) = w_1 x + (1 - w_1) x^2$.
+
+This leads to the equation:
+$$f(w_1) = \frac{-w_1 + \sqrt{w_1^2 + 0.4(1 - w_1)}}{2(1 - w_1)} - [w_1 \cdot 0.1 + (1 - w_1) \cdot \sqrt{0.1}] = 0$$
+
+We now test whether such a $w_1 \in (0,1)$ exists.
+
+### R Code
+
+```{r, fig.height=6.5, fig.width=7.5}
+a <- 0.1
+b <- sqrt(0.1)
+
+lhs <- function(w1) {
+  num <- -w1 + sqrt(w1^2 + 4 * (1 - w1) * a)
+  den <- 2 * (1 - w1)
+  result <- num / den
+  result[den == 0] <- NA
+  return(result)
+}
+
+rhs <- function(w1) {
+  return(w1 * a + (1 - w1) * b)
+}
+
+curve(lhs(x), from = 0.01, to = 0.99, n = 1000, col = "blue", lwd = 2,
+      ylab = "Quantile Value", xlab = "w1",
+      main = "Mixture Inverse vs Weighted Quantile Average")
+
+curve(rhs(x), from = 0.01, to = 0.99, n = 1000, col = "red", lwd = 2, add = TRUE)
+
+legend("topright",
+       legend = c(
+         expression(G^{-1}*(paste("(", p, "): Inverse of Mixture"))),
+         expression(sum(w[i] * F[i]^{-1}*(paste("(", p, ")"))) *
+                     ": Mixture of Inverses")
+       ),
+       col = c("blue", "red"),
+       lwd = 2)
+
+
+```
+
+### Result
+
+The plot of $f(w_1)$ reveals that:
+
+- ${G^{ - 1}}\left( p \right) \ne \sum\limits_{i = 1}^k {{w_i}} {F_i}\left( x \right)$ for all $w_1 \in (0,1)$,
+- i.e., **the two sides of the equation never intersect**.
+
+### Interpretation
+
+There is **no weight combination** that forces the mixture quantile to equal the weighted average of component quantiles at $p = 0.1$. This confirms:
+$$
+\boxed{
+  G^{-1}(p) \ne \sum w_i F_i^{-1}(p) \quad \text{in general}.
+}
+$$
+
+Quantiles are fundamentally **nonlinear** under mixtures — particularly evident in the tails.
+
+\newpage
+
+`r "\\nocite{*}"`
 
 # References
 
