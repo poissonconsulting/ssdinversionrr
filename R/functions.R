@@ -9,12 +9,12 @@
 #' @returns A ggplot2 grob of the fitdists object.
 #' @export
 autoplot_fun <- function(x, y, plot.tag.position = c(0, 0.95)) {
-  autoplot(x, delta = Inf) +
+  ggplot2::autoplot(x, delta = Inf) +
     rremove("xlab") + rremove("ylab") +
-    labs(tag = as.character(y)) +
-    theme(
-      title = element_blank(),
-      plot.tag = element_text(size = 12),
+    ggplot2::labs(tag = as.character(y)) +
+    ggplot2::theme(
+      title = ggplot2::element_blank(),
+      plot.tag = ggplot2::element_text(size = 12),
       plot.tag.position = plot.tag.position
     )
 }
