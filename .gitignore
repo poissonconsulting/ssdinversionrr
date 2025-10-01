@@ -2,6 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-*.docx
-
 .DS_Store
+
+*.docx
+*.pdf
+*.tex
+*.log
