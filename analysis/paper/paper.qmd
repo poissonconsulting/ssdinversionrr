@@ -39,7 +39,7 @@ format:
       labels: all       # Number all equations
       section: false    # Don't use section numbers (e.g., just (1), (2), ...)
 bibliography: references.bib
-mainfont: "Latin Modern Roman"
+#mainfont: "Latin Modern Roman"
 csl: "../templates/journal-of-archaeological-science.csl"
 abstract: |
   Text of abstract
