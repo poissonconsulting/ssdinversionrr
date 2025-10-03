@@ -1,5 +1,5 @@
 ---
-title: "Model averaging statistical distributions and the inversion principle"
+title: "Model averaging cumulative probability distributions and the inversion principle"
 author:
   - name: "David Fox"
     corresponding: true
@@ -11,6 +11,7 @@ author:
     affiliations: [aims, iomrc]
   - name: "Joe Thorley"
     orcid: "0000-0002-7683-4592"
+    affiliations: poisson
 affiliations:
   - id: fosg
     name: "The University of Melbourne, Australia"
@@ -20,6 +21,8 @@ affiliations:
     name: "Australian Institute of Marine Science, Australia"
   - id: iomrc
     name: "Oceans Institute, The University of Western Australia, Australia"
+  - id: poisson
+    name: "Poisson Consulting Ltd., British Columbia, Australia"
 date: today
 date-format: long
 title-block-published: "Last updated"
@@ -44,9 +47,9 @@ csl: "../templates/journal-of-archaeological-science.csl"
 abstract: |
   Text of abstract
 keywords: |
-  model averaging; AICc weights; statistical distribution
+  model averaging; cumulative probability distributions; inversion principle; Akaike weights 
 highlights: |
-  This paper describes how typical arithmetic averaging of statistical distributions fails to satisfy the inversion principle and provides an alternative method for obtaining model averaged values from the extremes of statistical distributions.
+  This paper describes how standard weighted arithmetic model averaging of the tails of cumulative probability distributions fails to satisfy the inversion principle and provides an alternative method.
 ---
 
 ```{r echo=FALSE}
@@ -64,34 +67,49 @@ Highlights: `r rmarkdown::metadata$highlights`
 <!-- The actual document text starts here: -->
 
 # Introduction
-Statistical distributions are widely used across all fields of science to provide probabilistic estimates that are critical for scientific inference, and more importantly in a range of decision science frameworks. 
-For example, the species sensitivity distribution (SSD) is widely used in Australia, New Zealand, Canada, and the European Union to determine concentrations that are protective of most species within an ecosystem.
-In this case regulators are typically interested in the lower tails of the statistical distribution, such as the 1st, 5th and 10th percentiles, which would represent concentrations protective of 99, 95 and 90% of the ecosystem. 
+Cumulative probability distributions are widely used in many fields of science to provide probabilistic estimates that are critical for scientific inference, and more importantly in a range of decision science frameworks. 
+For example, species sensitivity distributions (SSD) are widely used in Australia, New Zealand, North America, and Europe to determine concentrations of water quality constituents that are protective of most species within an ecosystem.
+In this case regulators are typically interested in the lower tails of the cumulative distributions, such as the 1st, 5th and 10th percentiles, which approximate concentrations protective of 99, 95 and 90% of the species in ecosystem. 
 Another example is in maximum streamflow estimations sometimes used in risk management of hydraulic structures, where interest centres on the extreme upper tails of a statistical distribution, that represent rare events, such a 1 in 100 year, 1 in 200 year, or 1 in 500 year frequency [@bento_improved_2023].
 
-The choice of an appropriate statistical distribution to use is not always clear. In some situations, the choice of a suitable probability model is guided by theoretical considerations such as the Central Limit Theorem (CLT) in statistics which justifies the use of normal distributions when dealing with the aggregation of data values. In other cases, the use of a particular distributional form is supported by a wealth of empirical evidence – for example: the log-distribution in hydrology; the Poisson distribution to model random events in time and/or space, the normal distribution in medicine and the gamma distribution in the study of queues. 
+The choice of an appropriate statistical distribution to use is not always clear. In some situations, the choice of a suitable probability model is guided by theoretical considerations such as the Central Limit Theorem (CLT) in statistics which justifies the use of normal distributions when dealing with the the sum of many small additive effects.
+In other cases, the use of a particular distributional form is supported by a wealth of empirical evidence – for example: the gamma-Poisson distribution in modeling counts of fish, the normal distribution in medicine and the gamma distribution in the study of queues. 
 Examples in ecotoxicology that leverage support from either theory or evidence are relatively less common with the notable exception of toxicokinetic/toxicodynamic (TK/TD) modelling where the Weibull and log-normal distributions have both theoretical and empirical underpinnings in stochastic death (SD) and individual tolerance (IT) models [@jager2011guts]. 
 
-In species sensitivity modelling, the choice of the most appropriate (single) statistical distribution is a particularly vexing issue. This choice is hampered by a lack of any guiding statistical or biological theory and a plethora of confusing and equivocal empirical studies in support of one distributional form or another [@Fox2016;@Fox2021;@Yanagihara2024;@Yanagihara2025]. The situation is often not resolved by statistical goodness-of-fit tests and attempts to identify a single ‘best’ distribution are fraught. 
+In species sensitivity modelling, the choice of the most appropriate (single) statistical distribution is a particularly vexing issue. 
+This choice is hampered by a lack of any guiding statistical or biological theory and a plethora of confusing and equivocal empirical studies in support of one distributional form or another [@Fox2016;@Fox2021;@Yanagihara2024;@Yanagihara2025]. 
+The situation is often not resolved by statistical goodness-of-fit tests and attempts to identify a single ‘best’ distribution are fraught. 
 
-Model selection accounts for uncertainty: alternative plausible models often fit the data nearly equally well [@Fox2016;@Chapman2007] but yield substantively different estimates. Ignoring model uncertainty by selecting a single distribution is likely to underestimate the true variability in the final risk estimate and can potentially result in biased estimates. Model averaging addresses this by combining estimates across models using weights that reflect each model’s relative support in the data [@burnham_model_2002].
+Model selection accounts for uncertainty: alternative plausible models often fit the data nearly equally well [@Fox2016;@Chapman2007] but yield substantively different estimates. Ignoring model uncertainty by selecting a single distribution is likely to underestimate the true variability in the final estimates potentially resulting in poor decisions. 
+Model averaging addresses this concern by combining estimates across models using weights that reflect each model’s relative support in the data [@burnham_model_2002].
 
-Model averaging is not new. Its theoretical roots extend back to the 1970s and 1980s, particularly in the fields of forecasting and econometrics, where researchers recognised that averaging across competing models often yields better predictive performance than relying on a single best-fitting model [@Granger1984;@Bates1969]. Akaike’s development of the Akaike Information Criterion (AIC) in the early 1970s laid the foundation for frequentist model selection and model averaging, emphasizing predictive accuracy over strict hypothesis testing [@Akaike1973]. Building on this, Burnham and Anderson (2002) synthesized and extended these ideas into a formal framework for multimodel inference, advocating for the use of model averaging to account for model uncertainty in both estimation and prediction. Bayesian model averaging (BMA) was also formalized in the 1990s [@Raftery1997] and has since become widely used in applications ranging from genomics to climate modelling and epidemiology. The recent uptake of model averaging in ecotoxicology reflects this broader shift across disciplines toward acknowledging and incorporating model uncertainty in scientific inference.
+Model averaging is not new. 
+Its theoretical roots extend back to the 1970s and 1980s, particularly in the fields of forecasting and econometrics, where researchers recognised that averaging across competing models often yields better predictive performance than relying on a single best-fitting model [@Granger1984;@Bates1969]. 
+Akaike’s development of the Akaike Information Criterion (AIC) in the early 1970s laid the foundation for frequentist model selection and model averaging, emphasizing predictive accuracy over strict hypothesis testing [@Akaike1973].
+Building on this, Burnham and Anderson (2002) synthesized and extended these ideas into a formal framework for multimodel inference, advocating for the use of model averaging to account for model uncertainty in both estimation and prediction. 
+Bayesian model averaging (BMA) was also formalized in the 1990s [@Raftery1997] and has since become widely used in applications ranging from genomics to climate modelling and epidemiology. 
+The recent uptake of model averaging in ecotoxicology reflects this broader shift across disciplines toward acknowledging and incorporating model uncertainty in scientific inference.
 
-Recent work in ecotoxicology has increasingly emphasized model averaging (MA) as a robust alternative to single-model approaches in dose-response (D-R) modelling, species sensitivity distributions (SSDs) and benchmark dose (BMD) estimation. In SSD analysis, MA combines estimates from multiple plausible distributions (e.g., log-normal, log-logistic, Burr Type III, Weibull), providing more robust $HC_5$ estimates and explicitly accounting for model-form uncertainty—especially under sparse or heterogeneous data. This approach is supported in regulatory and research contexts by tools such as the USEPA SSD Toolbox [@epa_ssdtoolbox], the R packages ssdtools [@thorley_ssdtools_2025], drc [@Ritz2015], and `bayesnec` [@Fisher2024]. 
+Recent work in ecotoxicology has increasingly emphasized model averaging (MA) as a robust alternative to single-model approaches in dose-response (D-R) modelling, species sensitivity distributions (SSDs) and benchmark dose (BMD) estimation. 
+In SSD analysis, MA combines estimates from multiple plausible distributions (e.g., log-normal, log-logistic, Burr Type III, Weibull), providing more robust $HC_x$ estimates and explicitly accounting for uncertainty in the model-form — which is especially problematic when dealing with sparse or heterogeneous data. 
+This approach is supported in regulatory and research contexts by tools such as the USEPA SSD Toolbox [@epa_ssdtoolbox] and the R packages ssdtools [@thorley_ssdtools_2025], drc [@Ritz2015], and `bayesnec` [@Fisher2024]. 
 
-In parallel, model averaging has been increasingly applied in BMD modelling, where it addresses uncertainty in dose-response model selection and improves the robustness of BMD and BMDL estimates. Companion software such as the US EPA’s BMDS (Benchmark Dose Software) [@USEPA2023] and RIVM’s software tool, PROAST [@rivm_proast] incorporate model averaging functionality, allowing for probabilistic inference across competing models. These advances support the use of model-averaged inference as best practice in ecological risk assessment and regulatory ecotoxicology [@fox_methodologies_2024;@USEPA2023].
+Model averaging has also been increasingly applied in BMD modelling, where it addresses uncertainty in dose-response model selection and improves the robustness of BMD and BMDL estimates.
+Companion software such as the US EPA’s BMDS (Benchmark Dose Software) [@USEPA2023] and RIVM’s software tool, PROAST [@rivm_proast] incorporate model averaging functionality, allowing for probabilistic inference across competing models. 
+These advances support the use of model-averaged inference as best practice in ecological risk assessment and regulatory ecotoxicology [@fox_methodologies_2024;@USEPA2023].
 
 In the next section we discuss an important, although apparently not widely appreciated quirk of model averaged SSDs which negates the use of averaging across individual $HC_x$ estimates. 
 
-A critical but often overlooked flaw in conventional model averaging of statistical distributions is that the resulting estimator of $HC_x$ typically fails to satisfy what has been referred to as the *inversion principle* [@fox_methodologies_2024]. Mathematically, this requires: 
+A critical but often overlooked flaw in conventional model averaging of statistical distributions is that the resulting estimator of $HC_x$ typically fails to satisfy what has been referred to as the *inversion principle* [@fox_methodologies_2024]. 
+Mathematically, this requires: 
 
 $$
 FA(HC_x) \equiv 100x\%
 $$ {#eq-inv-princ}
 
 
-In words, the inversion principle says that for the $HC_x$ to be a legitimate percentile from some SSD, the fraction of species affected (FA) at $HC_x$ must be $(100x)$% when evaluated from the same SSD. Even when model averaging is correctly weighted (e.g. by AIC$_c$ weights; see Thorley & Schwarz, 2018), computing the model-averaged estimate as the weighted average of individual quantiles,
+In words, the inversion principle says that for the $HC_x$ to be a legitimate percentile from some SSD, the fraction of species affected (FA) at $HC_x$ must be $(100x)$% when evaluated from the same SSD. 
+Even when model averaging is correctly weighted (e.g. by AIC$_c$ weights; see -@thorley_ssdtools_2018), computing the model-averaged estimate as the weighted average of individual quantiles,
 
 $$
 \widehat{\mathrm{HC}}_x = \sum_{i=1}^m w_i \, F_i^{-1}(x)
@@ -103,15 +121,16 @@ $$
 \widehat{\mathrm{HC}}_x = G^{-1}(x), \quad \text{where} \quad G(u) = \sum_{i=1}^m w_i \, F_i(u).
 $$
 
-This discrepancy arises because **quantile and mixture operations do not commute**, as demonstrated analytically in Appendix A. Specifically, we show that unless all component distributions $F_i$ are identical or the quantile index $x$ corresponds to a point of linear coincidence among them, the following inequality generally holds:
+This discrepancy arises because **quantile and mixture operations do not commute**, as demonstrated analytically in Appendix A. 
+Specifically, we show that unless all component distributions $F_i$ are identical or the quantile index $x$ corresponds to a point of linear coincidence among them, the following inequality generally holds:
 
 $$
 G^{-1}(x) \ne \sum w_i \, F_i^{-1}(x).
 $$
 
-This failure of the inversion principle means that the arithmetic average of HC$_x$ values is **not** a valid estimate of the HC$_x$ for the model-averaged distribution.
+This violation of the inversion principle means that the arithmetic average of HC$_x$ values is **not** a valid estimate of the HC$_x$ for the model-averaged distribution.
 
-This inconsistency has been resolved in version 2 of the `ssdtools` R package [@ssdtoolsv2], which now computes $\widehat{\mathrm{HC}}_x$ by solving for the quantile $u^*_x$ that satisfies:
+This inconsistency has been resolved in version 2 of the `ssdtools` R package [@thorley_ssdtools_2025], which now computes $\widehat{\mathrm{HC}}_x$ by solving for the quantile $u^*_x$ that satisfies:
 
 $$
 G(u^*_x) = x,
@@ -123,9 +142,11 @@ $$
 \widehat{\mathrm{HC}}_x := u^*_x.
 $$
 
-This approach ensures that $\widehat{\mathrm{HC}}_x$ is a true quantile of the model-averaged distribution and thus satisfies the inversion principle by construction. We argue that model-averaging procedures which fail to adhere to this principle may lead to unrepresentative or biased estimates, and the results presented in Appendix A provide a rigorous basis for preferring the inversion-consistent formulation.
+This approach ensures that $\widehat{\mathrm{HC}}_x$ is a true quantile of the model-averaged distribution and thus satisfies the inversion principle by construction.
+We argue that model-averaging procedures which fail to adhere to this principle may lead to unrepresentative or biased estimates, and the results presented in Appendix A provide a rigorous basis for preferring the inversion-consistent formulation.
 
-The only currently available software tool that implements model-averaged SSDs is `ssdtools`. The USEPA software tool `ssdtoolbox` [@epa_ssdtoolbox] has no *intrinsic* model-averaging capability, although the version 1.0 companion technical manual discusses SSD model-averaging but incorrectly states that model-averaged estimates of the $HC_x$ may be calculated using $\overline {H{C_x}}  = \sum\nolimits_{j = 1}^m {{w_j}} H{C_{{x_j}}}$ (Equation 9) [@Etterson2020].
+The only currently available software tool that implements model-averaged SSDs is `ssdtools`.
+The USEPA software tool `ssdtoolbox` [@epa_ssdtoolbox] has no *intrinsic* model-averaging capability, although the version 1.0 companion technical manual discusses SSD model-averaging but incorrectly states that model-averaged estimates of the $HC_x$ may be calculated using $\overline {H{C_x}}  = \sum\nolimits_{j = 1}^m {{w_j}} H{C_{{x_j}}}$ (Equation 9) [@Etterson2020].
 
 # Methods
 
@@ -358,7 +379,8 @@ Regardless of the target application, approaches exist for estimating unbiased m
 
 # Acknowledgements
 
-We acknowledge contributions from Angeline Tillmanns, Seb Dalgarno, Kathleen McTavish, Heather Thompson, Doug Spry, Rick van Dam, Graham Batley, and Ali Azizisharzi. This work was funded by the Department of Climate Change, Energy, the Environment and Water, Australia.
+We acknowledge contributions from Angeline Tillmanns, Seb Dalgarno, Kathleen McTavish, Heather Thompson, Doug Spry, Rick van Dam, Graham Batley, and Ali Azizisharzi.
+This work was funded by the Department of Climate Change, Energy, the Environment and Water, Australia.
 
 \newpage
 
@@ -372,7 +394,8 @@ We acknowledge contributions from Angeline Tillmanns, Seb Dalgarno, Kathleen McT
 :::
 
 
-We wish to prove that the quantile of a *mixture distribution* is not equal to the same mixture of the individual quantiles. That is:
+We wish to prove that the quantile of a *mixture distribution* is not equal to the same mixture of the individual quantiles. 
+That is:
 
 Letting $G\left( x \right) = \sum\limits_{i = 1}^k {{w_i}} {F_i}\left( x \right){\text{  with  }}{w_i} \geqslant 0{\text{  and  }}\sum\limits_{i = 1}^k {{w_i}}  = 1$, where the ${F_i}\left( x \right)$ are *cdf*s, prove, that in general:
 
