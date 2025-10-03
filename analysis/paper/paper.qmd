@@ -1,5 +1,5 @@
 ---
-title: "Model averaging cumulative probability distributions and the inversion principle"
+title: "Model averaging probability distributions and the inversion principle"
 author:
   - name: "David Fox"
     corresponding: true
@@ -49,7 +49,7 @@ abstract: |
 keywords: |
   model averaging; cumulative probability distributions; inversion principle; Akaike weights 
 highlights: |
-  This paper describes how standard weighted arithmetic model averaging of the tails of cumulative probability distributions fails to satisfy the inversion principle and provides an alternative method.
+  This paper describes how standard model averaging of the percentiles of probability distributions violates the inversion principle and defines the method that satisfies the principle.
 ---
 
 ```{r echo=FALSE}
@@ -67,9 +67,9 @@ Highlights: `r rmarkdown::metadata$highlights`
 <!-- The actual document text starts here: -->
 
 # Introduction
-Cumulative probability distributions are widely used in many fields of science to provide probabilistic estimates that are critical for scientific inference, and more importantly in a range of decision science frameworks. 
+Probability distributions are widely used in many fields of science to provide estimates that are critical for scientific inference, and more importantly in a range of decision science frameworks. 
 For example, species sensitivity distributions (SSD) are widely used in Australia, New Zealand, North America, and Europe to determine concentrations of water quality constituents that are protective of most species within an ecosystem.
-In this case regulators are typically interested in the lower tails of the cumulative distributions, such as the 1st, 5th and 10th percentiles, which approximate concentrations protective of 99, 95 and 90% of the species in ecosystem. 
+In this case regulators are typically interested in the lower tails of the distributions, such as the 1st, 5th and 10th percentiles, which approximate concentrations protective of 99, 95 and 90% of the species in ecosystem.
 Another example is in maximum streamflow estimations sometimes used in risk management of hydraulic structures, where interest centres on the extreme upper tails of a statistical distribution, that represent rare events, such a 1 in 100 year, 1 in 200 year, or 1 in 500 year frequency [@bento_improved_2023].
 
 The choice of an appropriate statistical distribution to use is not always clear. In some situations, the choice of a suitable probability model is guided by theoretical considerations such as the Central Limit Theorem (CLT) in statistics which justifies the use of normal distributions when dealing with the the sum of many small additive effects.
