@@ -1,6 +1,7 @@
 library(readr)
 read_river_file <- function(f) {
-  dat <- readr::read_csv(f,
+  dat <- readr::read_csv(
+    f,
     skip = 3,
     col_types = cols(
       `Date and time` = col_datetime(format = "%H:%M:%S %d/%m/%Y"),
@@ -22,7 +23,12 @@ read_river_file <- function(f) {
   dat |>
     dplyr::filter(Quality...3 == Quality...5 & Quality...3 == Quality...7) |>
     dplyr::mutate(date = lubridate::date(`Date and time`)) |>
-    dplyr::select(date, quality = Quality...7, max = Max, comments = Comments) |>
+    dplyr::select(
+      date,
+      quality = Quality...7,
+      max = Max,
+      comments = Comments
+    ) |>
     dplyr::filter(!is.na(max))
 }
 list_files <- list.files("data-raw/river_data", full.names = TRUE)
@@ -36,7 +42,8 @@ flodata <- list_files |>
   dplyr::group_by(station_id, year) |>
   dplyr::summarise(
     flow = max(max),
-    n = dplyr::n(), .groups = "drop"
+    n = dplyr::n(),
+    .groups = "drop"
   ) |>
   dplyr::filter(n %in% c(1, 365, 366))
 

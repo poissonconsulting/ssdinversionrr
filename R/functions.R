@@ -10,7 +10,8 @@
 #' @export
 autoplot_fun <- function(x, y, plot.tag.position = c(0, 0.95)) {
   ggplot2::autoplot(x, delta = Inf) +
-    rremove("xlab") + rremove("ylab") +
+    rremove("xlab") +
+    rremove("ylab") +
     ggplot2::labs(tag = as.character(y)) +
     ggplot2::theme(
       title = ggplot2::element_blank(),
